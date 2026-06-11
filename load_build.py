@@ -2,16 +2,22 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.neighbors import NearestNeighbors
 import os
+from dotenv import load_dotenv
 import joblib
+
+load_dotenv()
 
 
 def load_build():
     KNN_PATH = os.environ["KNN_PATH"]
     if not os.path.exists(KNN_PATH):
+        # folder where load_build.py lives
+        HERE = os.path.dirname(os.path.abspath(__file__))
         # appid + ~330 tag-count columns
-        tags = pd.read_csv("data/steamspy_tag_data.csv")
+        tags = pd.read_csv(os.path.join(HERE, "data", "steamspy_tag_data.csv"))
         # only what you need
-        meta = pd.read_csv("data/steam.csv")[["appid", "name"]]
+        meta = pd.read_csv(os.path.join(
+            HERE, "data", "steam.csv"))[["appid", "name"]]
 
         # every tag row gains its name
         df = tags.merge(meta, on="appid", how="left")
@@ -31,7 +37,9 @@ def load_build():
         nn = NearestNeighbors(metric='cosine')
         nn.fit(X)
         joblib.dump(
-            {"nn": nn, "tfidf": tfidf, "labels": labels, "tag_cols": tag_cols}, KNN_PATH)
+            {"nn": nn, "tfidf": tfidf, "labels": labels,
+             "tag_cols": tag_cols, "counts": df[tag_cols].reset_index(drop=True)},
+            KNN_PATH)
 
     bundle: dict = joblib.load(KNN_PATH)
     return bundle
