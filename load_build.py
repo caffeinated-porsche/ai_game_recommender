@@ -11,24 +11,17 @@ load_dotenv()
 def load_build():
     KNN_PATH = os.environ["KNN_PATH"]
     if not os.path.exists(KNN_PATH):
-        # folder where load_build.py lives
         HERE = os.path.dirname(os.path.abspath(__file__))
-        # appid + ~330 tag-count columns
         tags = pd.read_csv(os.path.join(HERE, "data", "steamspy_tag_data.csv"))
-        # only what you need
         meta = pd.read_csv(os.path.join(
             HERE, "data", "steam.csv"))[["appid", "name"]]
 
-        # every tag row gains its name
         df = tags.merge(meta, on="appid", how="left")
         df = df.dropna(subset=["name"]).reset_index(
-            drop=True)  # drop tag rows with no name match
+            drop=True)
 
-        # split: coordinates vs coat-check tickets
         tag_cols = [c for c in df.columns if c not in ("appid", "name")]
-        # the count matrix -> goes to TF-IDF
         X = df[tag_cols]
-        # row-aligned to X, for result lookup
         labels = df[["appid", "name"]]
 
         tfidf = TfidfTransformer()

@@ -25,7 +25,6 @@ def main():
         counts = bundle["counts"]
         results = []
         for idx in indices[0]:
-            # carries an avoid tag -> skip
             if avoid and counts.iloc[idx][avoid].sum() > 0:
                 continue
             results.append(bundle["labels"].iloc[idx]["name"])
